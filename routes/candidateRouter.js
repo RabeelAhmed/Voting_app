@@ -88,4 +88,84 @@ router.delete("/:candidateId",jwtAuthMiddleware, async (req, res) => {
   }
 });
 
+router.post("/vote/:candidateId", jwtAuthMiddleware, async (req, res)=>{
+
+  candidateId = req.params.candidateId
+
+    userId = req.user.userData.id
+
+  try {
+
+    const candidate = await candidateSchema.findById(candidateId)
+
+    if(!candidate){
+      return res.status(404).json({ message: "Candidate not found" })
+    }
+
+    const user = await userSchema.findById(userId)
+
+    if(!user){
+      return res.status(404).json({ message: "User not found" }) 
+    }
+
+    if(user.isVoted){
+      return res.status(403).json({ message: "You have already voted" })
+    }
+
+    if(user.role == 'admin'){
+      return res.status(403).json({ message: "Admins cannot vote" })
+    }
+    
+    candidate.votes.push({user: userId})
+    candidate.voteCount++
+    await candidate.save()
+
+    user.isVoted = true
+    await user.save()
+    res.status(200).json({message: "Vote recorded successfully"})
+
+
+  }catch(err){
+    res.status(500).send("Internal server error");
+  }
+})
+
+router.get("/vote/count", async (req, res) =>{
+  try {
+    const candidates = await candidateSchema.find().sort({voteCount: 'desc'})
+
+    const record = candidates.map((data)=>{
+      return {
+        party: data.party,
+        count: data.voteCount,
+      }
+    })
+
+    return res.status(200).json(record)
+
+  }catch(err){
+    res.status(500).send("Internal server error");
+  }
+})
+
+router.get("/chekcandidates", jwtAuthMiddleware, async (req, res) => {
+  try{
+
+    const candidates = await candidateSchema.find().sort({voteCount: 'desc'})
+
+    const record = candidates.map((data)=>{
+      return {
+        name: data.name,
+        party: data.party,
+        count: data.voteCount,
+      }
+    })
+
+    res.status(200).json(record)
+
+  }catch(err){
+    res.status(500).send("Internal server error");
+  }
+})
+
 module.exports = router;
