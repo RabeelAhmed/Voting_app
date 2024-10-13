@@ -20,7 +20,6 @@ const checkAdminRole = async (userId) => {
 
 }
 
-// User signup
 router.post("/",jwtAuthMiddleware, async (req, res) => {
   try {
     console.log(req.user.userData.id)
