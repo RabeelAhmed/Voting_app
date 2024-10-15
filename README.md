@@ -24,7 +24,6 @@ Test the API endpoints by making HTTP requests (GET, POST, PUT, DELETE).
 Pass authentication tokens in the headers to simulate logged-in users.
 Send request bodies for user signup, login, candidate management, and voting.
 View responses in real-time to validate the correctness of your API.
-
 🔮 Future Enhancements
 Build a frontend to provide a user interface for the voting functionality.
 Add real-time vote count updates with WebSockets.
