@@ -1,0 +1,36 @@
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+    
+     <% if (typeof error !== 'undefined' && error) { %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <form action="/user/login" method="POST">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="idCardNumber">
+                ID Card Number
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="idCardNumber" name="idCardNumber" type="number" required>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                Password
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="password" name="password" type="password" required>
+        </div>
+        
+        <div class="flex items-center justify-between">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+                Login
+            </button>
+            <a class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800" href="/user/signup">
+                Don't have an account? Sign Up
+            </a>
+        </div>
+    </form>
+</div>

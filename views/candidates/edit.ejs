@@ -1,0 +1,44 @@
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6">Edit Candidate</h1>
+    
+    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <%= error_msg[0] %>
+        </div>
+    <% } %>
+
+    <form action="/candidate/<%= candidate._id %>" method="POST">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                Candidate Name
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="name" name="name" type="text" value="<%= candidate.name %>" required>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="party">
+                Political Party
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="party" name="party" type="text" value="<%= candidate.party %>" required>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="age">
+                Age
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="age" name="age" type="number" value="<%= candidate.age %>" required>
+        </div>
+        
+        <div class="flex items-center justify-between">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+                Update Candidate
+            </button>
+            <a class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800" href="/candidate/chekcandidates">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>

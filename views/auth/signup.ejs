@@ -1,0 +1,86 @@
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+    
+    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <%= error_msg[0] %>
+        </div>
+    <% } %>
+
+    <form action="/user/signup" method="POST">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                Full Name
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="name" name="name" type="text" required>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="age">
+                Age
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="age" name="age" type="number" required>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                Email
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="email" name="email" type="email">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="mobile">
+                Mobile Number
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="mobile" name="mobile" type="text">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="idCardNumber">
+                ID Card Number
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="idCardNumber" name="idCardNumber" type="number" required>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                Password
+            </label>
+            <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                   id="password" name="password" type="password" required>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="role">
+                Role
+            </label>
+            <select class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                    id="role" name="role">
+                <option value="voter">Voter</option>
+                <% if (!locals.adminExists) { %>
+                    <option value="admin">Admin</option>
+                <% } %>
+            </select>
+            <% if (locals.adminExists) { %>
+                <p class="text-sm text-gray-600 mt-2">
+                    Admin account already exists (<%= locals.adminName %>)
+                </p>
+            <% } %>
+        </div>
+        
+        <div class="flex items-center justify-between">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+                Sign Up
+            </button>
+            <a class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800" href="/user/login">
+                Already have an account? Login
+            </a>
+        </div>
+    </form>
+</div>

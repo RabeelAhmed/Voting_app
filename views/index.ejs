@@ -1,0 +1,43 @@
+<div class="text-center py-12">
+    <h1 class="text-4xl font-bold text-blue-600 mb-6">Welcome to the Voting App</h1>
+    <p class="text-xl text-gray-700 mb-8">Cast your vote securely and easily</p>
+    
+    <% if (!locals.user) { %>
+        <div class="flex justify-center space-x-4">
+            <a href="/user/login" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+                Login
+            </a>
+            <a href="/user/signup" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+                Sign Up
+            </a>
+        </div>
+    <% } else { %>
+        <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md text-left">
+            <h2 class="text-2xl font-bold mb-4">Hello, <%= locals.user.name %>!</h2>
+            <p class="mb-4">You are logged in as a <span class="font-semibold capitalize"><%= locals.user.role %></span>.</p>
+            
+            <% if (locals.user.role === 'voter' && !locals.user.isVoted) { %>
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+                    <p>You haven't voted yet. Please cast your vote!</p>
+                    <a href="/candidate/chekcandidates" class="inline-block mt-2 text-blue-600 hover:text-blue-800 font-medium">
+                        View Candidates →
+                    </a>
+                </div>
+            <% } else if (locals.user.role === 'voter' && locals.user.isVoted) { %>
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+                    <p>Thank you for voting! You can view the results now.</p>
+                    <a href="/candidate/vote/count" class="inline-block mt-2 text-green-600 hover:text-green-800 font-medium">
+                        View Results →
+                    </a>
+                </div>
+            <% } else if (locals.user.role === 'admin') { %>
+                <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 mb-4">
+                    <p>You have admin privileges. You can manage candidates.</p>
+                    <a href="/candidate/chekcandidates" class="inline-block mt-2 text-purple-600 hover:text-purple-800 font-medium">
+                        Manage Candidates →
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+</div>

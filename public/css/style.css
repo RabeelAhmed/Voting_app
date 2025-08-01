@@ -1,0 +1,20 @@
+/* Custom styles can go here */
+.flash-message {
+    animation: fadeOut 3s ease-in-out forwards;
+    animation-delay: 2s;
+}
+/* Add this to your existing CSS */
+.text-gray-600 {
+    color: #4b5563;
+}
+.text-sm {
+    font-size: 0.875rem;
+}
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; display: none; }
+}

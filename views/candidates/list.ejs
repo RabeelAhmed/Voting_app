@@ -1,0 +1,48 @@
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-2xl font-bold mb-6">Candidates List</h1>
+    
+    <% if (user && user.role === 'admin') { %>
+        <div class="mb-6">
+            <a href="/candidate/add" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Add New Candidate
+            </a>
+        </div>
+    <% } %>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% candidates.forEach(candidate => { %>
+            <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+                <h2 class="text-xl font-semibold"><%= candidate.name %></h2>
+                <p class="text-gray-600">Party: <%= candidate.party %></p>
+                <p class="text-gray-600">Age: <%= candidate.age %></p>
+                <p class="text-gray-600">Votes: <%= candidate.voteCount %></p>
+                
+                <% if (user && user.role === 'admin') { %>
+                    <div class="mt-4 flex space-x-2">
+                        <a href="/candidate/<%= candidate._id %>/edit" 
+                           class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm">
+                            Edit
+                        </a>
+                        <form action="/candidate/<%= candidate._id %>/delete" method="POST" class="inline">
+                            <button type="submit" 
+                                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                <% } else if (user && !user.isVoted && user.role !== 'admin') { %>
+                    <div class="mt-4">
+                        <form action="/candidate/vote/<%= candidate._id %>" method="POST">
+                            <button type="submit" 
+                                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm">
+                                Vote
+                            </button>
+                        </form>
+                    </div>
+                <% } else if (user && user.isVoted) { %>
+                    <p class="mt-4 text-green-600 font-medium">You have already voted</p>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+</div>

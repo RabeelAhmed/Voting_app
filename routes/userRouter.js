@@ -3,100 +3,151 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { jwtAuthMiddleware, generateToken } = require("../jwt");
 const userSchema = require("../models/user");
+const path = require('path');
+
+// Login page
+router.get('/login', (req, res) => {
+    res.render('auth/login', { 
+        title: 'Login',
+        error: req.flash('error_msg')[0] // Get the first error message if exists
+    });
+});
+
+// Signup page
+router.get('/signup', async (req, res) => {
+    const admin = await userSchema.findOne({ role: 'admin' });
+    res.render('auth/signup', { 
+        title: 'Sign Up',
+        adminExists: !!admin,
+        adminName: admin?.name || ''
+    });
+});
 
 // User signup
 router.post("/signup", async (req, res) => {
-  try {
-    const { name, age, email, mobile, idCardNumber, password, role } = req.body;
+    try {
+        const { name, age, email, mobile, idCardNumber, password, role } = req.body;
 
-    // Check if user already exists
-    let user = await userSchema.findOne({ email });
-    if (user) return res.status(401).send("User already exists!");
+        // Check if trying to create admin account
+        if (role === 'admin') {
+            const existingAdmin = await userSchema.findOne({ role: 'admin' });
+            if (existingAdmin) {
+                req.flash('error_msg', `Admin account already exists (${existingAdmin.name})`);
+                return res.redirect('/user/signup');
+            }
+        }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+        let user = await userSchema.findOne({ idCardNumber });
+        if (user) {
+            req.flash('error_msg', 'User with this ID already exists!');
+            return res.redirect('/user/signup');
+        }
 
-    // Create the new user with the role (admin/voter)
-    const newUser = await userSchema.create({
-      name,
-      email,
-      age,
-      mobile,
-      idCardNumber,
-      password: hashedPassword,
-      role: role || 'voter'  // Set role, default to 'voter' if not provided
-    });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await userSchema.create({
+            name, email, age, mobile, idCardNumber,
+            password: hashedPassword,
+            role: role || 'voter'
+        });
 
-    // Create a JWT token (assuming you have a generateToken function)
-    const payload = { id: newUser.id };
-    const token = generateToken(payload);
-
-    // Send the response
-    res.status(200).send({ newUser, token });
-  } catch (err) {
-    res.status(500).send("Internal server error");
-  }
+        const payload = { id: newUser.id, role: newUser.role };
+        const token = generateToken(payload);
+        
+        res.cookie('token', token, { httpOnly: true });
+        req.flash('success_msg', 'Registration successful!');
+        res.redirect('/');
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Registration failed. Please try again.');
+        res.redirect('/user/signup');
+    }
 });
 
 // User login
 router.post("/login", async (req, res) => {
-  try {
-    const { idCardNumber, password } = req.body;
+    try {
+        const { idCardNumber, password } = req.body;
+        let user = await userSchema.findOne({ idCardNumber });
 
-    let user = await userSchema.findOne({ idCardNumber });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            req.flash('error_msg', 'Invalid ID card number or password');
+            return res.redirect('/user/login');
+        }
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(404).json({ error: "Invalid ID card number or password" });
+        // Fix payload structure - remove the double nesting
+        const payload = { 
+            id: user.id,
+            role: user.role 
+        };
+        
+        const token = generateToken(payload);
+        
+        res.cookie('token', token, { 
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        
+        req.flash('success_msg', 'Login successful!');
+        res.redirect('/');
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Login failed. Please try again.');
+        res.redirect('/user/login');
     }
-
-    const payload = { id: user.id };
-    const token = generateToken(payload);
-
-    res.json({ token });
-  } catch (err) {
-    res.status(500).send("Internal server error");
-  }
 });
-
-// Get user profile
+// Profile page
 router.get("/profile", jwtAuthMiddleware, async (req, res) => {
-  try {
-    // console.log(req.user.userData.id)
-    const userId = req.user.userData.id; // Get user ID from JWT payload
-    const user = await userSchema.findOne({_id: userId});
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    try {
+        const userId = req.user.userData.id;
+        const user = await userSchema.findById(userId);
+        if (!user) {
+            req.flash('error_msg', 'User not found');
+            return res.redirect('/');
+        }
+        res.render('profile', { title: 'Profile', user });
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Error loading profile');
+        res.redirect('/');
     }
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ error: "Internal server error" });
-  }
 });
 
 // Update user password
-router.put("/:profile/password", jwtAuthMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { currentPassword, newPassword } = req.body;
+router.post("/profile/password", jwtAuthMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userData.id;
+        const { currentPassword, newPassword } = req.body;
 
-    const user = await userSchema.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+        const user = await userSchema.findById(userId);
+        if (!user) {
+            req.flash('error_msg', 'User not found');
+            return res.redirect('/user/profile');
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            req.flash('error_msg', 'Invalid current password');
+            return res.redirect('/user/profile');
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        req.flash('success_msg', 'Password updated successfully');
+        res.redirect('/user/profile');
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Error updating password');
+        res.redirect('/user/profile');
     }
+});
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid current password" });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    await user.save();
-
-    res.status(200).send({ message: "Password updated successfully" });
-  } catch (err) {
-    res.status(500).send("Internal server error");
-  }
+// Logout
+router.get("/logout", (req, res) => {
+    res.clearCookie('token');
+    req.flash('success_msg', 'Logged out successfully');
+    res.redirect('/');
 });
 
 module.exports = router;

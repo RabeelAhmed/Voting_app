@@ -1,0 +1,64 @@
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6">User Profile</h1>
+    
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Personal Information</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Name:</p>
+                <p class="font-medium"><%= user.name %></p>
+            </div>
+            <div>
+                <p class="text-gray-600">Age:</p>
+                <p class="font-medium"><%= user.age %></p>
+            </div>
+            <div>
+                <p class="text-gray-600">Email:</p>
+                <p class="font-medium"><%= user.email || 'Not provided' %></p>
+            </div>
+            <div>
+                <p class="text-gray-600">Mobile:</p>
+                <p class="font-medium"><%= user.mobile || 'Not provided' %></p>
+            </div>
+            <div>
+                <p class="text-gray-600">ID Card Number:</p>
+                <p class="font-medium"><%= user.idCardNumber %></p>
+            </div>
+            <div>
+                <p class="text-gray-600">Role:</p>
+                <p class="font-medium capitalize"><%= user.role %></p>
+            </div>
+            <div>
+                <p class="text-gray-600">Voting Status:</p>
+                <p class="font-medium">
+                    <%= user.isVoted ? 'Already Voted' : 'Not Voted Yet' %>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="border-t pt-6">
+        <h2 class="text-xl font-semibold mb-4">Update Password</h2>
+        <form action="/user/profile/password" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="currentPassword">
+                    Current Password
+                </label>
+                <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                       id="currentPassword" name="currentPassword" type="password" required>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="newPassword">
+                    New Password
+                </label>
+                <input class="w-full px-3 py-2 border rounded shadow appearance-none" 
+                       id="newPassword" name="newPassword" type="password" required>
+            </div>
+            
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+                Update Password
+            </button>
+        </form>
+    </div>
+</div>
